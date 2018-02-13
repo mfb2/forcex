@@ -2,20 +2,21 @@ defmodule Mix.Tasks.Compile.Forcex do
   use Mix.Task
 
   @recursive false
+  @default_endpoint "https://login.salesforce.com"
 
   def run(_) do
     {:ok, _} = Application.ensure_all_started(:forcex)
 
-    client = Forcex.Client.login
-
-    case client do
-      %{access_token: nil} -> IO.puts("Invalid configuration/credentials. Cannot generate SObjects.")
-      _ -> generate_modules(client)
-    end
+    Forcex.Client.default_config
+    |> Forcex.Client.login(%Forcex.Client{endpoint: config()[:endpoint] || @default_endpoint})
+    |> generate_modules
 
     :ok
   end
 
+  defp generate_modules(%{access_token: nil}) do
+    IO.puts("Invalid configuration/credentials. Cannot generate SObjects.")
+  end
   defp generate_modules(client) do
     client = Forcex.Client.locate_services(client)
 
@@ -217,4 +218,6 @@ defmodule Mix.Tasks.Compile.Forcex do
 "     * `#{value}`\n"
   end
   defp docs_for_picklist_values(_), do: ""
+
+  defp config, do: Application.get_env(:forcex, Forcex.Client)
 end
