@@ -34,6 +34,10 @@ defmodule Mix.Tasks.Compile.Forcex do
 
   end
 
+  defp filter_sobjects(nil) do
+    IO.puts "No SOBject data returned from SFDC"
+    []
+  end
   defp filter_sobjects(all_sobjects),                    do: filter_sobjects(all_sobjects, config()[:sobjects])
   defp filter_sobjects(all_sobjects, []),                do: all_sobjects
   defp filter_sobjects(all_sobjects, nil),               do: all_sobjects
